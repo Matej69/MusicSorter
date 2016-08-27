@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">MusicSorter</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_on_app_open">OnAppOpenActivity</string>
+    <string name="title_activity_song_name">SongNameActivity</string>
+    <string name="title_activity_song_list_screen">SongListScreen</string>
+    <string name="title_activity_player">Player</string>
+</resources>
