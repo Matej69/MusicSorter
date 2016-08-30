@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CategoryList>
+        <CategoryItem>
+            <Name>PrvoIme1</Name>
+            <ImageID>1</ImageID>
+            <Song>Pjesma mojeg konja 1</Song>
+            <Song>Yugioh theme</Song>
+        </CategoryItem>
+        <CategoryItem>
+            <Name>Prvo Ime2</Name>
+            <ImageID>2</ImageID>
+            <Song>Pjesma mojeg konja2</Song>
+        </CategoryItem>
+</CategoryList>

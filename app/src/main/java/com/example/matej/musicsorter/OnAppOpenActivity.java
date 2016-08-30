@@ -1,7 +1,10 @@
 package com.example.matej.musicsorter;
 
+
 import android.content.ClipData;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -11,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -18,12 +22,24 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.Inflater;
+import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 public class OnAppOpenActivity extends AppCompatActivity {
+
+    ListView list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,47 +57,85 @@ public class OnAppOpenActivity extends AppCompatActivity {
             }
         });
 
-        //Writen by me......
+        //access for graphic objects
+        list = (ListView)findViewById(R.id.listView);
 
+
+        SetOnClickListListener();
         InitSongList();
+        //Toast.makeText(getApplicationContext(), "Button is clicked", Toast.LENGTH_LONG).show();
+
 
     }
 
-    
+
     public void InitSongList(){
-        ArrayList<SongItem> songs = new ArrayList<SongItem>();
+        ArrayList<SongCategory> songs = new ArrayList<SongCategory>();
 
         //HERE WILL BE fOR LOOP THat READS imageCATEGORY + categoryName
         // + LAST ONE FOR ADDiNG NEW CATEGORIES
-        songs.add(new SongItem("song 1",R.drawable.checker_checked));
-        songs.add(new SongItem("song 3",R.drawable.checker_unchecked));
-        songs.add(new SongItem("song 3",R.drawable.checker_checked));
+        songs.add(new SongCategory("song 13333", R.drawable.emoticon_ninja,null));
+        songs.add(new SongCategory("song 3", R.drawable.emoticon_rock,null));
+        songs.add(new SongCategory("song 3",R.drawable.emoticon_code,null));
 
-        ListView list = (ListView)findViewById(R.id.listView);
+        //testing parser
+        MyXMLParser xmlParser = new MyXMLParser();
+        ArrayList<SongCategory> testSongs = null;
+
+        //We are gonna read and save data to file that is not part of program -> exter/itern file ::: must not be in raw folder **************************************
+        InputStream inputStream = getResources().openRawResource(getResources().getIdentifier("songscategory","raw", getPackageName()));
+        testSongs = xmlParser.GetSongCategories(inputStream,getApplicationContext());
+        Toast.makeText(getApplicationContext(), testSongs.get(0).songs.get(0), Toast.LENGTH_SHORT).show();
+
+
+
+
+
         CheckerSongsAdapter adapter = new CheckerSongsAdapter(this,songs);
         list.setAdapter(adapter);
     }
+
+    public void SetOnClickListListener(){
+        list.setClickable(true);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ImageView emoticon = (ImageView)view.findViewById(R.id.emoticonImage_id);
+                TextView name = (TextView)view.findViewById(R.id.categoryName_id);
+
+                // 1.)get list of all songs under category name of TextView(name).getText() from XML file;
+                // 2.)get list of all songs that exist on device as strings
+                // send 1.) and 2.) to "Choose_songs" and display it there
+                Toast.makeText(getApplicationContext(),name.getText(),Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+
+
 
 }
 
 
 
 //******** CLASSES ********
-class SongItem{
+/*class SongCategory{
     String name;
     int imageID;
-    SongItem(String _name, int _imageID){
+    ArrayList<String> songs;
+    SongCategory(String _name, int _imageID, ArrayList<String> _songs){
         this.name = _name;
         this.imageID = _imageID;
     }
 }
+*/
 
-class CheckerSongsAdapter extends ArrayAdapter<SongItem> {
-    ArrayList<SongItem> songs;
+class CheckerSongsAdapter extends ArrayAdapter<SongCategory> {
+    ArrayList<SongCategory> songs;
     Context context;
 
-    public CheckerSongsAdapter(Context _context, ArrayList<SongItem> _songs){
-        super(_context,R.layout.mylayout,_songs);
+    public CheckerSongsAdapter(Context _context, ArrayList<SongCategory> _songs){
+        super(_context, R.layout.mylayout, _songs);
         this.context = _context;
         this.songs = _songs;
     }
@@ -91,19 +145,17 @@ class CheckerSongsAdapter extends ArrayAdapter<SongItem> {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.mylayout,parent,false);
 
-        TextView text1 = (TextView)row.findViewById(R.id.textView_id);
-        ImageView image = (ImageView)row.findViewById(R.id.checkerImage_id);
+        TextView text1 = (TextView)row.findViewById(R.id.categoryName_id);
+        ImageView image = (ImageView)row.findViewById(R.id.emoticonImage_id);
         text1.setText(songs.get(position).name);
         image.setImageResource(songs.get(position).imageID);
-
-
 
         return row;
     }
 
-
-
 }
+
+
 
 
 

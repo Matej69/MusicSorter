@@ -5,23 +5,24 @@
     android:weightSum="1">
 
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/textView_id"
+        android:id="@+id/categoryName_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="#f0f"
         android:text="I DID IT FATHER, I DID IT"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/checkerImage_id"
+        android:layout_toRightOf="@+id/emoticonImage_id"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:autoText="false"
         android:textAlignment="center"
         android:textSize="@dimen/abc_dialog_padding_material"
-        android:layout_alignBottom="@+id/checkerImage_id" />
+        android:layout_alignBottom="@+id/emoticonImage_id" />
 
     <ImageView
-        android:id="@+id/checkerImage_id"
-        android:src="@drawable/checker_unchecked"
+        android:id="@+id/emoticonImage_id"
+        android:src="@drawable/emoticon_skull"
+        android:clickable="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
