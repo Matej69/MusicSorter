@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -22,16 +23,19 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.zip.Inflater;
 import android.widget.Toast;
 
@@ -83,11 +87,53 @@ public class OnAppOpenActivity extends AppCompatActivity {
         ArrayList<SongCategory> testSongs = null;
 
         //We are gonna read and save data to file that is not part of program -> exter/itern file ::: must not be in raw folder **************************************
-        InputStream inputStream = getResources().openRawResource(getResources().getIdentifier("songscategory","raw", getPackageName()));
+        /*InputStream inputStream = getResources().openRawResource(getResources().getIdentifier("songscategory","raw", getPackageName()));
         testSongs = xmlParser.GetSongCategories(inputStream,getApplicationContext());
         Toast.makeText(getApplicationContext(), testSongs.get(0).songs.get(0), Toast.LENGTH_SHORT).show();
+        */
 
 
+        //String filePath = "/storage/sdcard0/testingMe.txt";
+
+       /* String data = "<CategoryList>\n" +
+                "        <CategoryItem>\n" +
+                "            <Name>PrvoIme1</Name>\n" +
+                "            <ImageID>1</ImageID>\n" +
+                "            <Song>Pjesma mojeg konja one</Song>\n" +
+                "            <Song>Yugioh theme</Song>\n" +
+                "        </CategoryItem>\n" +
+                "        <CategoryItem>\n" +
+                "            <Name>Prvo Ime2</Name>\n" +
+                "            <ImageID>2</ImageID>\n" +
+                "            <Song>Pjesma mojeg konja2</Song>\n" +
+                "        </CategoryItem>\n" +
+                "</CategoryList>";
+        FileOutputStream fo = null;
+        try {
+            fo = new FileOutputStream(filePath);
+            fo.write(data.getBytes());
+            fo.flush();
+            fo.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+        FileInputStream  is = null;
+        String txt = "";
+        String line = null;
+        try {
+            is = new FileInputStream(filePath);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        */
+
+        testSongs = xmlParser.GetSongCategories(getApplicationContext());
+        xmlParser.WriteToSongCategoriesXML(testSongs);
+        testSongs = xmlParser.GetSongCategories(getApplicationContext());
+
+        Toast.makeText(getApplicationContext(),testSongs.get(0).songs.get(1),Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(),txt,Toast.LENGTH_LONG).show();
 
 
 
