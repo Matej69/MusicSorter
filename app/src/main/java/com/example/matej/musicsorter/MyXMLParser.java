@@ -1,6 +1,7 @@
 package com.example.matej.musicsorter;
 
 import android.content.Context;
+import android.util.Xml;
 import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -19,9 +20,18 @@ import java.util.StringTokenizer;
 public class MyXMLParser {
 
     String filePath;
+    StringBuilder XMLtext;
 
     MyXMLParser(){
-        filePath = "/storage/sdcard0/testingMe.txt";
+        filePath = "/storage/sdcard0/myXml.xml";
+        XMLtext = new StringBuilder();
+    }
+
+    String StartTag(String tag){
+        return new String("\n<"+tag+">");
+    }
+    String EndTag(String tag){
+        return new String("</"+tag+">");
     }
 
     ArrayList<SongCategory> GetSongCategories(Context con){
@@ -103,40 +113,42 @@ public class MyXMLParser {
    void WriteToSongCategoriesXML( ArrayList<SongCategory> songCategories){
 
        //take data from variables and create one string that will be written to XMLfile
-       String data = "<CategoryList>\n" +
-               "        <CategoryItem>\n" +
-               "            <Name>PrvoIme1 workz2</Name>\n" +
-               "            <ImageID>1</ImageID>\n" +
-               "            <Song>Pjesma mojeg konja one</Song>\n" +
-               "            <Song>Yugioh theme</Song>\n" +
-               "        </CategoryItem>\n" +
-               "        <CategoryItem>\n" +
-               "            <Name>Prvo Ime2</Name>\n" +
-               "            <ImageID>2</ImageID>\n" +
-               "            <Song>Pjesma mojeg konja2</Song>\n" +
-               "        </CategoryItem>\n" +
-               "</CategoryList>";
+
+
+       XMLtext.append(StartTag("CategoryList"));
+       for(SongCategory songCat : songCategories){
+           XMLtext.append(StartTag("CategoryItem"));
+           XMLtext.append(StartTag("Name")+songCat.name+EndTag("Name"));
+           XMLtext.append(StartTag("ImageID") + songCat.imageID + EndTag("ImageID"));
+           for(String songName : songCat.songs){
+               XMLtext.append(StartTag("Song") + songName + EndTag("Song"));
+           }
+           XMLtext.append(EndTag("CategoryItem"));
+       }
+       XMLtext.append(EndTag("CategoryList"));
 
        //writing to XML file
        FileOutputStream fileStream = null;
        try {
            fileStream = new FileOutputStream(filePath);
-           fileStream.write(data.getBytes());
-           fileStream.flush();
-           fileStream.close();
+           fileStream.write(XMLtext.toString().getBytes());
        }catch (IOException e){
            e.printStackTrace();
        }
        finally {
            try{
-               if(fileStream != null)
+               if(fileStream != null) {
                    fileStream.close();
+                   fileStream.flush();
+               }
            }catch(IOException e){
                e.printStackTrace();
            }
        }
 
     }
+
+
 
 
 

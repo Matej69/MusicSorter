@@ -15,9 +15,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class SongListScreen extends AppCompatActivity {
+
+    ArrayList<String> songNamesList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +28,6 @@ public class SongListScreen extends AppCompatActivity {
         setContentView(R.layout.activity_song_list_screen);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -37,6 +39,10 @@ public class SongListScreen extends AppCompatActivity {
 
 
 
+        //list of songs(Strings) that we got from "OnAppOpenActivity" by clicking on song category
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+        songNamesList = (ArrayList)bundle.getParcelableArrayList("songNamesList");
 
        // File root = Environment.getExternalStorageDirectory();
         File root = new File("/storage/sdcard0");
@@ -66,20 +72,28 @@ public class SongListScreen extends AppCompatActivity {
 
    public ArrayList<File> GetAllMusicFiles(File root){
 
-        ArrayList<File> files = new ArrayList<File>();
-        File[] filesInside = root.listFiles();
+       File[] allFiles = root.listFiles();
+       ArrayList<File> songfiles = new ArrayList<File>();
+       ArrayList<File> neededSongFiles = new ArrayList<File>();
 
-        for(File file : filesInside){
-            if(file.isDirectory()){
-                files.addAll(GetAllMusicFiles(file));
-            }
-            else if (file.getName().endsWith(".mp3")){
-                files.add(file);
-            }
+       //search through all files and find all .mp3 songs
+       for(File file : allFiles){
+           if(file.isDirectory()){
+               songfiles.addAll(GetAllMusicFiles(file));
+           }
+           else if (file.getName().endsWith(".mp3")){
+               songfiles.add(file);
+           }
+       }
+       //check which one actually belong to list from list of song names we have
+       for(File songfile : songfiles){
+           for(String neededSongName : songNamesList)
+           if(songfile.getName().matches(neededSongName)){
+               neededSongFiles.add(songfile);
+           }
+       }
 
-        }
-
-        return files;
+        return neededSongFiles;
     }
 
     public ArrayList<String> GetNamesFromSongList(ArrayList<File> songList){

@@ -8,7 +8,6 @@
         android:id="@+id/categoryName_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#f0f"
         android:text="I DID IT FATHER, I DID IT"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/emoticonImage_id"
@@ -17,9 +16,12 @@
         android:autoText="false"
         android:textAlignment="center"
         android:textSize="@dimen/abc_dialog_padding_material"
-        android:layout_alignBottom="@+id/emoticonImage_id" />
+        android:layout_alignBottom="@+id/emoticonImage_id"
+        android:gravity="center_vertical"
+        android:textStyle="bold"
+        android:textColor="#4a0000" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/emoticonImage_id"
         android:src="@drawable/emoticon_skull"
         android:clickable="true"

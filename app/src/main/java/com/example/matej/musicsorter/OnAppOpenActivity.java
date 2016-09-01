@@ -18,6 +18,7 @@ import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -44,6 +45,7 @@ import org.w3c.dom.Text;
 public class OnAppOpenActivity extends AppCompatActivity {
 
     ListView list;
+    ArrayList<SongCategory> songCategoryList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +53,6 @@ public class OnAppOpenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_on_app_open);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,12 +62,12 @@ public class OnAppOpenActivity extends AppCompatActivity {
             }
         });
 
+
         //access for graphic objects
         list = (ListView)findViewById(R.id.listView);
 
-
-        SetOnClickListListener();
         InitSongList();
+        SetOnClickListListener();
         //Toast.makeText(getApplicationContext(), "Button is clicked", Toast.LENGTH_LONG).show();
 
 
@@ -74,127 +75,91 @@ public class OnAppOpenActivity extends AppCompatActivity {
 
 
     public void InitSongList(){
-        ArrayList<SongCategory> songs = new ArrayList<SongCategory>();
-
         //HERE WILL BE fOR LOOP THat READS imageCATEGORY + categoryName
         // + LAST ONE FOR ADDiNG NEW CATEGORIES
-        songs.add(new SongCategory("song 13333", R.drawable.emoticon_ninja,null));
-        songs.add(new SongCategory("song 3", R.drawable.emoticon_rock,null));
-        songs.add(new SongCategory("song 3",R.drawable.emoticon_code,null));
 
         //testing parser
         MyXMLParser xmlParser = new MyXMLParser();
-        ArrayList<SongCategory> testSongs = null;
 
-        //We are gonna read and save data to file that is not part of program -> exter/itern file ::: must not be in raw folder **************************************
-        /*InputStream inputStream = getResources().openRawResource(getResources().getIdentifier("songscategory","raw", getPackageName()));
-        testSongs = xmlParser.GetSongCategories(inputStream,getApplicationContext());
-        Toast.makeText(getApplicationContext(), testSongs.get(0).songs.get(0), Toast.LENGTH_SHORT).show();
-        */
+            //songs.add("journey.mp3"); songs.add("leavin.mp3");
+            //songList.add(new SongCategory("Ljubav u prelomu", R.drawable.emoticon_heart, songs));
+            //songList.add(new SongCategory("ninja i ja",R.drawable.emoticon_ninja,songs));
 
+        songCategoryList = xmlParser.GetSongCategories(getApplicationContext());
 
-        //String filePath = "/storage/sdcard0/testingMe.txt";
-
-       /* String data = "<CategoryList>\n" +
-                "        <CategoryItem>\n" +
-                "            <Name>PrvoIme1</Name>\n" +
-                "            <ImageID>1</ImageID>\n" +
-                "            <Song>Pjesma mojeg konja one</Song>\n" +
-                "            <Song>Yugioh theme</Song>\n" +
-                "        </CategoryItem>\n" +
-                "        <CategoryItem>\n" +
-                "            <Name>Prvo Ime2</Name>\n" +
-                "            <ImageID>2</ImageID>\n" +
-                "            <Song>Pjesma mojeg konja2</Song>\n" +
-                "        </CategoryItem>\n" +
-                "</CategoryList>";
-        FileOutputStream fo = null;
-        try {
-            fo = new FileOutputStream(filePath);
-            fo.write(data.getBytes());
-            fo.flush();
-            fo.close();
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-
-        FileInputStream  is = null;
-        String txt = "";
-        String line = null;
-        try {
-            is = new FileInputStream(filePath);
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-        */
-
-        testSongs = xmlParser.GetSongCategories(getApplicationContext());
-        xmlParser.WriteToSongCategoriesXML(testSongs);
-        testSongs = xmlParser.GetSongCategories(getApplicationContext());
-
-        Toast.makeText(getApplicationContext(),testSongs.get(0).songs.get(1),Toast.LENGTH_LONG).show();
-        //Toast.makeText(getApplicationContext(),txt,Toast.LENGTH_LONG).show();
-
-
-
-        CheckerSongsAdapter adapter = new CheckerSongsAdapter(this,songs);
+        //set adapter for list
+        CheckerSongsAdapter adapter = new CheckerSongsAdapter(this,songCategoryList);
         list.setAdapter(adapter);
+        //set last item to be custom View(ImageButton+Text)
+        LayoutInflater inflater = (LayoutInflater)getApplicationContext().getSystemService(getApplicationContext().LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.footer_item,null,false);
+        list.addFooterView(view);
+        //set last item Button.OnClickEvent
+        ImageButton addButton = (ImageButton)view.findViewById(R.id.footerImageButton);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), ChooseSongs.class));
+            }
+        });
+
     }
 
     public void SetOnClickListListener(){
         list.setClickable(true);
+        list.setFocusable(true);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(getApplicationContext(),"clicked",Toast.LENGTH_LONG).show();
+
                 ImageView emoticon = (ImageView)view.findViewById(R.id.emoticonImage_id);
                 TextView name = (TextView)view.findViewById(R.id.categoryName_id);
+
+                //for chosing existing category
+                startActivity(new Intent(getApplicationContext(),SongListScreen.class).putExtra("songNamesList",songCategoryList.get(position).songs));
 
                 // 1.)get list of all songs under category name of TextView(name).getText() from XML file;
                 // 2.)get list of all songs that exist on device as strings
                 // send 1.) and 2.) to "Choose_songs" and display it there
-                Toast.makeText(getApplicationContext(),name.getText(),Toast.LENGTH_LONG).show();
             }
         });
     }
 
 
-
-
 }
 
 
-
-//******** CLASSES ********
-/*class SongCategory{
-    String name;
-    int imageID;
-    ArrayList<String> songs;
-    SongCategory(String _name, int _imageID, ArrayList<String> _songs){
-        this.name = _name;
-        this.imageID = _imageID;
-    }
-}
-*/
 
 class CheckerSongsAdapter extends ArrayAdapter<SongCategory> {
-    ArrayList<SongCategory> songs;
+    ArrayList<SongCategory> songCat;
     Context context;
 
     public CheckerSongsAdapter(Context _context, ArrayList<SongCategory> _songs){
         super(_context, R.layout.mylayout, _songs);
         this.context = _context;
-        this.songs = _songs;
+        this.songCat = _songs;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.mylayout,parent,false);
 
         TextView text1 = (TextView)row.findViewById(R.id.categoryName_id);
         ImageView image = (ImageView)row.findViewById(R.id.emoticonImage_id);
-        text1.setText(songs.get(position).name);
-        image.setImageResource(songs.get(position).imageID);
+
+        text1.setText(songCat.get(position).name);
+        image.setImageResource(songCat.get(position).imageID);
+
+        text1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                context.startActivity(new Intent(context, SongListScreen.class).putExtra("songNamesList", songCat.get(position).songs));
+            }
+        });
+                //Toast.makeText(context, "clicked", Toast.LENGTH_LONG).show();
+
 
         return row;
     }

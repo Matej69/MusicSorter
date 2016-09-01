@@ -5,4 +5,5 @@
     <string name="title_activity_song_name">SongNameActivity</string>
     <string name="title_activity_song_list_screen">SongListScreen</string>
     <string name="title_activity_player">Player</string>
+    <string name="title_activity_choose_songs">ChooseSongs</string>
 </resources>
