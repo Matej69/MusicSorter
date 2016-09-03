@@ -33,7 +33,8 @@ public class ChooseSongs extends AppCompatActivity {
     EditText categoryTextfield;
 
     MySongAdapter songAdapter;
-    SongCategory songCategory;
+
+    Intent intent;
 
 
     @Override
@@ -57,8 +58,12 @@ public class ChooseSongs extends AppCompatActivity {
         songList = (ListView)findViewById(R.id.songList_choosing);
         categoryTextfield = (EditText)findViewById(R.id.textfield_categoryName);
 
-        SongListInit();
+        intent = getIntent();
 
+        GetAndSetIntent();
+
+        SetEmoticonButtonListener();
+        SongListInit();
         SetSaveButtonListener();
 
         //songCategory = GetSongCategoryFromInputData();
@@ -66,6 +71,23 @@ public class ChooseSongs extends AppCompatActivity {
         //Toast.makeText(getApplicationContext(),  songCategory.songs.get(1).toString(),Toast.LENGTH_LONG).show();
 
 
+    }
+
+
+    void GetAndSetIntent(){
+        if(intent != null) {
+            int imgID = intent.getExtras().getInt("ImageID");
+            smileButton.setImageResource(imgID);
+        }
+    }
+
+    void SetEmoticonButtonListener(){
+        smileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(),Choose_icon.class));
+            }
+        });
     }
 
 
@@ -91,7 +113,7 @@ public class ChooseSongs extends AppCompatActivity {
         SongCategory songCategory = new SongCategory();
 
         songCategory.name = categoryTextfield.getText().toString();
-        songCategory.imageID = R.drawable.emoticon_smile;
+        songCategory.imageID = intent.getExtras().getInt("ImageID");;
 
         for(int i = 0; i < songList.getCount(); ++i){
             //we need to parse our row into view object********************************************************************************************************************************************************************

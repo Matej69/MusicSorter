@@ -14,17 +14,11 @@
             android:name=".OnAppOpenActivity"
             android:label="@string/title_activity_on_app_open"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".SongListScreen"
             android:label="@string/title_activity_song_list_screen"
-            android:theme="@style/AppTheme.NoActionBar">
-
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".Player"
             android:label="@string/title_activity_player"
@@ -32,9 +26,17 @@
         <activity
             android:name=".ChooseSongs"
             android:label="@string/title_activity_choose_songs"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".Choose_icon"
+            android:label="@string/title_activity_choose_icon"
             android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
