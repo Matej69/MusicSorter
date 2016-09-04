@@ -56,8 +56,8 @@ public class Player extends AppCompatActivity{
 
         //MedialPlayer init
         Uri uri = Uri.parse(songObjectList.get(position).toString());
-        musicPlayer = MediaPlayer.create(getApplicationContext(),uri);
-        musicPlayer.start();
+        musicPlayer = MediaPlayer.create(getApplicationContext(), uri);
+        ChangeSongTo(changeDir.NEXT);
 
         songName.setText(songObjectList.get(position).getName());
 
@@ -83,11 +83,7 @@ public class Player extends AppCompatActivity{
                 }
             }
         };
-
         thread_updateSongBar.start();
-
-
-
 
 
         //Graphic object on click and other events setup
@@ -107,17 +103,13 @@ public class Player extends AppCompatActivity{
         button_prev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                musicPlayer.stop();
                 ChangeSongTo(changeDir.PREVIOUS);
-                musicPlayer.start();
             }
         });
         button_next.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                musicPlayer.stop();
                 ChangeSongTo(changeDir.NEXT);
-                musicPlayer.start();
             }
         });
 
@@ -128,9 +120,7 @@ public class Player extends AppCompatActivity{
                // if(fingerDown)
                //     musicPlayer.seekTo(seekBar.getProgress());
                 if(seekBar.getProgress() >= seekBar.getMax()){
-                    musicPlayer.stop();
                     ChangeSongTo(changeDir.NEXT);
-                    musicPlayer.start();
                 }
 
             }
@@ -148,8 +138,17 @@ public class Player extends AppCompatActivity{
 
     }
 
+    //recursive function that, if song cant be playied is going to next song until it finds playable song
+    void NextPlayableSong(){
+        try{
+
+        }catch (Exception e){
+
+        }
+    }
+
     //called when song needs to be changed
-    public void ChangeSongTo(changeDir _dir){
+    /*public void ChangeSongTo(changeDir _dir){
         button_pause.setText("||");
         switch (_dir){
             case PREVIOUS   : position = (position - 1 < 0) ? songObjectList.size() - 1 : position - 1; break;
@@ -160,6 +159,35 @@ public class Player extends AppCompatActivity{
         songName.setText(songObjectList.get(position).getName());
 
     };
+    */
+
+    public void ChangeSongTo(changeDir _dir){
+        //trying to stop previous song, if song is legit it will be stoped,
+        //if there is a problem with song file data, it will skip this stoppage
+        try{
+            musicPlayer.stop();
+        }catch (Exception e){
+        }
+
+        button_pause.setText("||");
+        switch (_dir){
+            case PREVIOUS   : position = (position - 1 < 0) ? songObjectList.size() - 1 : position - 1; break;
+            case NEXT       : position = (position + 1 > songObjectList.size() - 1) ? 0 : position + 1; break;
+        }
+        Uri _uri = Uri.parse(songObjectList.get(position).toString());
+        musicPlayer = MediaPlayer.create(getApplicationContext(),_uri);
+        songName.setText(songObjectList.get(position).getName());
+
+        //this swill try to play current song,
+        // if it fails it will try to move to next/previous one
+        try{
+            musicPlayer.start();
+        }catch (Exception e){
+            ChangeSongTo(_dir);
+        }
+    };
+
+   // public void ChangeToNextAviable
 
 
 

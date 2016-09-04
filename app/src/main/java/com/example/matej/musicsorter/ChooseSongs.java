@@ -76,8 +76,12 @@ public class ChooseSongs extends AppCompatActivity {
 
     void GetAndSetIntent(){
         if(intent != null) {
-            int imgID = intent.getExtras().getInt("ImageID");
-            smileButton.setImageResource(imgID);
+            try {
+                int imgID = intent.getExtras().getInt("ImageID");
+                smileButton.setImageResource(imgID);
+            }catch (Exception e){
+
+            }
         }
     }
 

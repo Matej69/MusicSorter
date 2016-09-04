@@ -13,10 +13,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class SongListScreen extends AppCompatActivity {
 
@@ -46,8 +48,8 @@ public class SongListScreen extends AppCompatActivity {
 
        // File root = Environment.getExternalStorageDirectory();
         File root = new File("/storage/sdcard0");
-        final ArrayList<File> songObjectList = GetAllMusicFiles(root);
-
+        ArrayList<File> allMusicFiles = GetAllMusicFiles(root);
+        final ArrayList<File> songObjectList = GetRightsSongsFromAllSongs(allMusicFiles);
 
         final ListView songList = (ListView)findViewById(R.id.list_songsNameList);
         ArrayAdapter<String> adapter = new ArrayAdapter(this,R.layout.songlistitem,R.id.text_songNameItem_id,GetNamesFromSongList(songObjectList));
@@ -67,13 +69,25 @@ public class SongListScreen extends AppCompatActivity {
 
 
 
+//-------------------------------------------------------------------------------------------------------------------------------
+//FUNCTION FOR GETTING MUSIC FROM ALL FILES IN DEVICE, REMOVING 2 SAME FILES IN FINAL LIST, GEING NAMES ARRAY FROM FILES......
+// -------------------------------------------------------------------------------------------------------------------------------
 
-
+    boolean IsFileUniqueInList(String thisFileName, ArrayList<File> fileList){
+        for (File file : fileList){
+            //Toast.makeText(getApplicationContext(),"is "+file.getName() +" = "+thisFileName,Toast.LENGTH_SHORT).show();
+            if(thisFileName.equalsIgnoreCase(file.getName().toString())) {
+                return false;
+            }
+        }
+        return true;
+    }
 
    public ArrayList<File> GetAllMusicFiles(File root){
 
        File[] allFiles = root.listFiles();
        ArrayList<File> songfiles = new ArrayList<File>();
+
        ArrayList<File> neededSongFiles = new ArrayList<File>();
 
        //search through all files and find all .mp3 songs
@@ -82,18 +96,24 @@ public class SongListScreen extends AppCompatActivity {
                songfiles.addAll(GetAllMusicFiles(file));
            }
            else if (file.getName().endsWith(".mp3")){
-               songfiles.add(file);
-           }
-       }
-       //check which one actually belong to list from list of song names we have
-       for(File songfile : songfiles){
-           for(String neededSongName : songNamesList)
-           if(songfile.getName().matches(neededSongName)){
-               neededSongFiles.add(songfile);
+              if(IsFileUniqueInList(file.getName(), songfiles))
+                   songfiles.add(file);
            }
        }
 
-        return neededSongFiles;
+        return songfiles;
+    }
+
+    public ArrayList<File> GetRightsSongsFromAllSongs(ArrayList<File> allMusicFiles){
+        ArrayList<File> finalMusicFileList = new ArrayList<File>();
+
+        for(File songfile : allMusicFiles){
+            for(String songName : songNamesList)
+                if(songfile.getName().matches(songName) && IsFileUniqueInList(songName,finalMusicFileList)){
+                    finalMusicFileList.add(songfile);
+                }
+        }
+        return finalMusicFileList;
     }
 
     public ArrayList<String> GetNamesFromSongList(ArrayList<File> songList){
@@ -104,12 +124,5 @@ public class SongListScreen extends AppCompatActivity {
         return songNames;
     }
 
-
-
-
-
-
-    //ListView songList = (ListView)findViewById(R.id.list_songsNameList);
-    //ArrayAdapter<String> adapter = new ArrayAdapter(this,R.layout.content_song_list_screen,)
 
 }

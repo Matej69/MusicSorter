@@ -111,7 +111,6 @@ public class OnAppOpenActivity extends AppCompatActivity {
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getApplicationContext(),"clicked",Toast.LENGTH_LONG).show();
 
                 ImageView emoticon = (ImageView)view.findViewById(R.id.emoticonImage_id);
                 TextView name = (TextView)view.findViewById(R.id.categoryName_id);
@@ -119,9 +118,6 @@ public class OnAppOpenActivity extends AppCompatActivity {
                 //for chosing existing category
                 startActivity(new Intent(getApplicationContext(),SongListScreen.class).putExtra("songNamesList",songCategoryList.get(position).songs));
 
-                // 1.)get list of all songs under category name of TextView(name).getText() from XML file;
-                // 2.)get list of all songs that exist on device as strings
-                // send 1.) and 2.) to "Choose_songs" and display it there
             }
         });
     }
@@ -158,6 +154,14 @@ class CheckerSongsAdapter extends ArrayAdapter<SongCategory> {
                 context.startActivity(new Intent(context, SongListScreen.class).putExtra("songNamesList", songCat.get(position).songs));
             }
         });
+        image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                context.startActivity(new Intent(context, SongListScreen.class).putExtra("songNamesList", songCat.get(position).songs));
+            }
+        });
+
+
                 //Toast.makeText(context, "clicked", Toast.LENGTH_LONG).show();
 
 
