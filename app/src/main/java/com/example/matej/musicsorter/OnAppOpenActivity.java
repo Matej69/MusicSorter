@@ -67,7 +67,7 @@ public class OnAppOpenActivity extends AppCompatActivity {
         list = (ListView)findViewById(R.id.listView);
 
         InitSongList();
-        SetOnClickListListener();
+        SetAddNewListeners();
         //Toast.makeText(getApplicationContext(), "Button is clicked", Toast.LENGTH_LONG).show();
 
 
@@ -81,45 +81,37 @@ public class OnAppOpenActivity extends AppCompatActivity {
         //testing parser
         MyXMLParser xmlParser = new MyXMLParser();
 
-            //songs.add("journey.mp3"); songs.add("leavin.mp3");
-            //songList.add(new SongCategory("Ljubav u prelomu", R.drawable.emoticon_heart, songs));
-            //songList.add(new SongCategory("ninja i ja",R.drawable.emoticon_ninja,songs));
-
         songCategoryList = xmlParser.GetSongCategories(getApplicationContext());
 
         //set adapter for list
-        CheckerSongsAdapter adapter = new CheckerSongsAdapter(this,songCategoryList);
+        CheckerSongsAdapter adapter = new CheckerSongsAdapter(this,songCategoryList,list);
         list.setAdapter(adapter);
         //set last item to be custom View(ImageButton+Text)
         LayoutInflater inflater = (LayoutInflater)getApplicationContext().getSystemService(getApplicationContext().LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.footer_item,null,false);
         list.addFooterView(view);
-        //set last item Button.OnClickEvent
-        ImageButton addButton = (ImageButton)view.findViewById(R.id.footerImageButton);
+    }
+
+    public void SetAddNewListeners(){
+        //set listener for BUTTON at end of the list
+        ImageButton addButton = (ImageButton)findViewById(R.id.footerImageButton);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getApplicationContext(), ChooseSongs.class));
             }
         });
-
-    }
-
-    public void SetOnClickListListener(){
-        list.setClickable(true);
-        list.setFocusable(true);
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        //set listener for TEXTVIEW at end of the list
+        TextView addTextView = (TextView)findViewById(R.id.textView2);
+        addTextView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                ImageView emoticon = (ImageView)view.findViewById(R.id.emoticonImage_id);
-                TextView name = (TextView)view.findViewById(R.id.categoryName_id);
-
-                //for chosing existing category
-                startActivity(new Intent(getApplicationContext(),SongListScreen.class).putExtra("songNamesList",songCategoryList.get(position).songs));
-
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), ChooseSongs.class));
             }
         });
+
+
+
     }
 
 
@@ -128,13 +120,15 @@ public class OnAppOpenActivity extends AppCompatActivity {
 
 
 class CheckerSongsAdapter extends ArrayAdapter<SongCategory> {
+    ListView itemList;
     ArrayList<SongCategory> songCat;
     Context context;
 
-    public CheckerSongsAdapter(Context _context, ArrayList<SongCategory> _songs){
+    public CheckerSongsAdapter(Context _context, ArrayList<SongCategory> _songs, ListView _itemList){
         super(_context, R.layout.mylayout, _songs);
         this.context = _context;
         this.songCat = _songs;
+        this.itemList = _itemList;
     }
 
     @Override
@@ -148,18 +142,45 @@ class CheckerSongsAdapter extends ArrayAdapter<SongCategory> {
         text1.setText(songCat.get(position).name);
         image.setImageResource(songCat.get(position).imageID);
 
+        /*
         text1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 context.startActivity(new Intent(context, SongListScreen.class).putExtra("songNamesList", songCat.get(position).songs));
             }
         });
+
         image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 context.startActivity(new Intent(context, SongListScreen.class).putExtra("songNamesList", songCat.get(position).songs));
             }
         });
+        */
+
+        itemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                context.startActivity(new Intent(context, SongListScreen.class).putExtra("songNamesList", songCat.get(position).songs));
+
+            }
+        });
+        itemList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                String listName = ((TextView)view.findViewById(R.id.categoryName_id)).getText().toString();
+                int emoticonID = songCat.get(position).imageID;
+                ArrayList<String> listOfSongs = songCat.get(position).songs;
+
+                Intent intentToSend = new Intent(context,ChooseSongs.class);
+                intentToSend.putExtra("StartActivity_listName", listName);
+                intentToSend.putExtra("StartActivity_listOfSongs",listOfSongs);
+                intentToSend.putExtra("ImageID",emoticonID);
+                context.startActivity(intentToSend);
+                return true;
+            }
+        });
+
 
 
                 //Toast.makeText(context, "clicked", Toast.LENGTH_LONG).show();

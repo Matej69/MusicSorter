@@ -61,9 +61,9 @@ public class SongListScreen extends AppCompatActivity {
                 text.setText(GetNamesFromSongList(songObjectList).get(position));
                 startActivity(new Intent(getApplicationContext(),Player.class).putExtra("position",position).putExtra("songObjectList",songObjectList));
                 //go to new screen and play song
-
             }
         });
+
 
     }
 

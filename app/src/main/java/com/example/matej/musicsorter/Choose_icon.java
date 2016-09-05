@@ -76,8 +76,14 @@ public class Choose_icon extends AppCompatActivity {
         doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //get list of items that were checked
                 int currentImgID = Integer.parseInt(selectedImage.getTag().toString());
-                startActivity(new Intent(getApplicationContext(),ChooseSongs.class).putExtra("ImageID",currentImgID));
+                ArrayList<String> checkededSongsHolder = getIntent().getExtras().getStringArrayList("StartActivity_listOfSongs");
+                //send checked items to next Activity
+                Intent Activityintent = new Intent(getApplicationContext(),ChooseSongs.class);
+                Activityintent.putExtra("StartActivity_listOfSongs",checkededSongsHolder);
+                Activityintent.putExtra("ImageID", currentImgID);
+                startActivity(Activityintent);
             }
         });
     }

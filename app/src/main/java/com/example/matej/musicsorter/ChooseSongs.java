@@ -1,5 +1,6 @@
 package com.example.matej.musicsorter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -22,7 +23,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.zip.Inflater;
 
 public class ChooseSongs extends AppCompatActivity {
@@ -31,6 +35,8 @@ public class ChooseSongs extends AppCompatActivity {
     ImageButton smileButton;
     ImageButton saveButton;
     EditText categoryTextfield;
+
+    ArrayList<Integer> checkerImageIDs;
 
     MySongAdapter songAdapter;
 
@@ -76,6 +82,7 @@ public class ChooseSongs extends AppCompatActivity {
 
     void GetAndSetIntent(){
         if(intent != null) {
+            //intent coming from AddingNewSong
             try {
                 int imgID = intent.getExtras().getInt("ImageID");
                 smileButton.setImageResource(imgID);
@@ -85,11 +92,27 @@ public class ChooseSongs extends AppCompatActivity {
         }
     }
 
+    ArrayList<String> GetCheckedSongsNames(){
+        ArrayList<String> checkedSongNames = new ArrayList<String>();
+
+        View itemView = songList.getAdapter().getView(2,null,null);
+        MySongAdapter myAdapter = (MySongAdapter)songList.getAdapter();
+        for(int i = 0; i < myAdapter.songNames.size(); ++i){
+            if(myAdapter.imagesID.get(i) == R.drawable.checker_checked) {
+                checkedSongNames.add(myAdapter.songNames.get(i));
+            }
+        }
+
+        return checkedSongNames;
+    }
+
     void SetEmoticonButtonListener(){
         smileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(),Choose_icon.class));
+
+                ArrayList<String> checkedNames = GetCheckedSongsNames();
+                startActivity(new Intent(getApplicationContext(), Choose_icon.class).putExtra("StartActivity_listOfSongs",checkedNames));
             }
         });
     }
@@ -103,6 +126,24 @@ public class ChooseSongs extends AppCompatActivity {
                 MyXMLParser parser = new MyXMLParser();
                 ArrayList<SongCategory> allSongsCategories = parser.GetSongCategories(getApplicationContext());
 
+                //first remove all other songCategories with same name(there will be only one or none)
+                Iterator<SongCategory> it = allSongsCategories.iterator();
+                Toast.makeText(getApplicationContext(),"REMOVING",Toast.LENGTH_LONG).show();
+                while (it.hasNext()){
+                    SongCategory currentSong = it.next();
+                    if(currentSong.name.equalsIgnoreCase(songCategory.name)) {
+                        it.remove();
+                    }
+                }
+
+                //check for stupid values
+                if(songCategory.name.equalsIgnoreCase(""))
+                    songCategory.name = "def";
+
+
+                //songCategory.imageID = R.drawable.emoticon_smile;
+                Toast.makeText(getApplicationContext(),"ss",Toast.LENGTH_LONG).show();
+
                 allSongsCategories.add(songCategory);
                 parser.WriteToSongCategoriesXML(allSongsCategories);
                 //1.) save category to XML
@@ -112,15 +153,21 @@ public class ChooseSongs extends AppCompatActivity {
         });
     }
 
+
+
     //Get SongCategory object that will be later written in XML file
     SongCategory GetSongCategoryFromInputData(){
         SongCategory songCategory = new SongCategory();
 
         songCategory.name = categoryTextfield.getText().toString();
-        songCategory.imageID = intent.getExtras().getInt("ImageID");;
+        //if we cant get it over intent, set default value
+        try{
+            songCategory.imageID = intent.getExtras().getInt("ImageID");
+        }catch (Exception e){
+            songCategory.imageID = R.drawable.emoticon_smile;
+        }
 
         for(int i = 0; i < songList.getCount(); ++i){
-            //we need to parse our row into view object********************************************************************************************************************************************************************
             View view = songList.getAdapter().getView(i, null , songList);
             ImageButton checkerImage = (ImageButton)view.findViewById(R.id.emoticonImage_id);
             if(songAdapter.imagesID.get(i) == R.drawable.checker_checked) {
@@ -134,14 +181,13 @@ public class ChooseSongs extends AppCompatActivity {
         return songCategory;
     }
 
-
     //seting up list of songs
     public void SongListInit(){
         //get list of all .mp3 and display it in list
         File rootFile = new File("/storage/sdcard0");
         ArrayList<File> SongFiles = GetAllMusicFiles(rootFile);
         // take their names and adapt them to list
-        songAdapter = new MySongAdapter(getApplicationContext(),GetNamesFromSongList(SongFiles));
+        songAdapter = new MySongAdapter(this,GetNamesFromSongList(SongFiles));
         songList.setAdapter(songAdapter);
     }
 
@@ -171,13 +217,10 @@ public class ChooseSongs extends AppCompatActivity {
         }
         return songNames;
     }
-
-
 }
 
 
-
-
+// song list adapter!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 class MySongAdapter extends ArrayAdapter<String>{
 
@@ -188,11 +231,31 @@ class MySongAdapter extends ArrayAdapter<String>{
 
     public MySongAdapter(Context _context, ArrayList<String> _songNames){
         super(_context, R.layout.mylayout, _songNames);
-        context = _context;
+        this.context = _context;
         songNames = _songNames;
 
+        //set images to array that came from "OnAppOpenActivity"
         imagesID = new ArrayList<Integer>();
         getViewItemCounter = 0;
+    }
+
+    public void FillImageIDArrayWithIDs(int i){
+        //adding all UNCHECKED checkers, later if names are equal they become CHECKED
+        imagesID.add(R.drawable.checker_unchecked);
+
+        //if there is intent with list of names that we can get, see which checkedSongNames are in list of song names
+        try{
+            Intent local_intent = ((Activity)context).getIntent();
+            ArrayList<String> checkedSongNames = local_intent.getExtras().getStringArrayList("StartActivity_listOfSongs");
+                for(String checkedSongName : checkedSongNames){
+                    if(songNames.get(i).equalsIgnoreCase(checkedSongName)){
+                        imagesID.set(i,R.drawable.checker_checked);
+                    }
+                }
+            //Toast.makeText(context, "TRYING",Toast.LENGTH_LONG).show();
+        }catch (Exception e){
+            //Toast.makeText(context, e.getMessage().toString(),Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -210,7 +273,7 @@ class MySongAdapter extends ArrayAdapter<String>{
         //initial valuse that are set only once
         if(getViewItemCounter < songNames.size()){
             image.setImageResource(R.drawable.checker_unchecked);
-            imagesID.add(R.drawable.checker_unchecked);
+            FillImageIDArrayWithIDs(getViewItemCounter);
             getViewItemCounter++;
         }
 
@@ -219,12 +282,11 @@ class MySongAdapter extends ArrayAdapter<String>{
         image.setImageResource(imagesID.get(position));
 
         //set listeners..................................................
-        image.setOnClickListener(new View.OnClickListener() {
+        /*image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ImageView imageLocal = (ImageView)v.findViewById(R.id.emoticonImage_id);
                 String tagStr = imageLocal.getTag().toString();
-                Toast.makeText(context,tagStr,Toast.LENGTH_SHORT).show();
                 int tagInt = Integer.parseInt(tagStr);
 
                 if(imagesID.get(tagInt) == R.drawable.checker_unchecked){
@@ -236,6 +298,7 @@ class MySongAdapter extends ArrayAdapter<String>{
 
             }
         });
+        */
         rowView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
