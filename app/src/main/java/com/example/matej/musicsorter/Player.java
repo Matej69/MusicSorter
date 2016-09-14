@@ -10,10 +10,12 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,6 +26,9 @@ public class Player extends AppCompatActivity{
     int position;
     MediaPlayer musicPlayer;
     Thread thread_updateSongBar;
+
+    int maxNumOfSkippedSongs = 5;
+    int numOfSkippedSongs = 0;
 
     //references to graphic objects
     TextView songName;
@@ -122,7 +127,6 @@ public class Player extends AppCompatActivity{
                 if(seekBar.getProgress() >= seekBar.getMax()){
                     ChangeSongTo(changeDir.NEXT);
                 }
-
             }
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
@@ -134,33 +138,21 @@ public class Player extends AppCompatActivity{
                 musicPlayer.seekTo(seekBar.getProgress());
             }
         });
-
-
     }
 
-    //recursive function that, if song cant be playied is going to next song until it finds playable song
-    void NextPlayableSong(){
-        try{
-
-        }catch (Exception e){
-
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            musicPlayer.stop();
+            super.onKeyDown(keyCode,event);
+            return true;
         }
+        return super.onKeyDown(keyCode, event);
     }
 
-    //called when song needs to be changed
-    /*public void ChangeSongTo(changeDir _dir){
-        button_pause.setText("||");
-        switch (_dir){
-            case PREVIOUS   : position = (position - 1 < 0) ? songObjectList.size() - 1 : position - 1; break;
-            case NEXT       : position = (position + 1 > songObjectList.size() - 1) ? 0 : position + 1; break;
-        }
-        Uri _uri = Uri.parse(songObjectList.get(position).toString());
-        musicPlayer = MediaPlayer.create(getApplicationContext(),_uri);
-        songName.setText(songObjectList.get(position).getName());
 
-    };
-    */
 
+    //recursive function that, if song cant be playied is going to next song until it finds playable song or reach llimit of repeats we asigne it to do
     public void ChangeSongTo(changeDir _dir){
         //trying to stop previous song, if song is legit it will be stoped,
         //if there is a problem with song file data, it will skip this stoppage
@@ -179,15 +171,20 @@ public class Player extends AppCompatActivity{
         songName.setText(songObjectList.get(position).getName());
 
         //this swill try to play current song,
-        // if it fails it will try to move to next/previous one
+        //if it fails it will try to move to next/previous one
+        //if song was skipped 'maxNumOfSkippedSongs' times == we have 'maxNumOfSkippedSongs' unreadable songs == JUST EXIT
         try{
             musicPlayer.start();
         }catch (Exception e){
-            ChangeSongTo(_dir);
+            if(++numOfSkippedSongs >= maxNumOfSkippedSongs) {
+                numOfSkippedSongs = 0;
+                Toast.makeText(getApplicationContext(),"problem with reading song data",Toast.LENGTH_LONG).show();
+                startActivity(new Intent(getApplicationContext(), OnAppOpenActivity.class));
+            } else {
+                ChangeSongTo(_dir);
+            }
         }
     };
-
-   // public void ChangeToNextAviable
 
 
 

@@ -63,6 +63,8 @@ public class OnAppOpenActivity extends AppCompatActivity {
         });
 
 
+        Toast.makeText(getApplicationContext(),Integer.toString(android.os.Build.VERSION.SDK_INT),Toast.LENGTH_LONG).show();
+
         //access for graphic objects
         list = (ListView)findViewById(R.id.listView);
 
@@ -83,13 +85,13 @@ public class OnAppOpenActivity extends AppCompatActivity {
 
         songCategoryList = xmlParser.GetSongCategories(getApplicationContext());
 
-        //set adapter for list
-        CheckerSongsAdapter adapter = new CheckerSongsAdapter(this,songCategoryList,list);
-        list.setAdapter(adapter);
         //set last item to be custom View(ImageButton+Text)
         LayoutInflater inflater = (LayoutInflater)getApplicationContext().getSystemService(getApplicationContext().LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.footer_item,null,false);
         list.addFooterView(view);
+        //set adapter for list
+        CheckerSongsAdapter adapter = new CheckerSongsAdapter(this,songCategoryList,list);
+        list.setAdapter(adapter);
     }
 
     public void SetAddNewListeners(){
@@ -109,9 +111,6 @@ public class OnAppOpenActivity extends AppCompatActivity {
                 startActivity(new Intent(getApplicationContext(), ChooseSongs.class));
             }
         });
-
-
-
     }
 
 
@@ -142,22 +141,6 @@ class CheckerSongsAdapter extends ArrayAdapter<SongCategory> {
         text1.setText(songCat.get(position).name);
         image.setImageResource(songCat.get(position).imageID);
 
-        /*
-        text1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                context.startActivity(new Intent(context, SongListScreen.class).putExtra("songNamesList", songCat.get(position).songs));
-            }
-        });
-
-        image.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                context.startActivity(new Intent(context, SongListScreen.class).putExtra("songNamesList", songCat.get(position).songs));
-            }
-        });
-        */
-
         itemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -173,7 +156,7 @@ class CheckerSongsAdapter extends ArrayAdapter<SongCategory> {
                 ArrayList<String> listOfSongs = songCat.get(position).songs;
 
                 Intent intentToSend = new Intent(context,ChooseSongs.class);
-                intentToSend.putExtra("StartActivity_listName", listName);
+                intentToSend.putExtra("songListName", listName);
                 intentToSend.putExtra("StartActivity_listOfSongs",listOfSongs);
                 intentToSend.putExtra("ImageID",emoticonID);
                 context.startActivity(intentToSend);

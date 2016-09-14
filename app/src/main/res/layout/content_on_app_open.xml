@@ -14,10 +14,11 @@
     tools:showIn="@layout/activity_on_app_open">
 
     <ListView
+        android:dividerHeight="20px"
+        android:divider="@android:color/transparent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/listView"
-        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 

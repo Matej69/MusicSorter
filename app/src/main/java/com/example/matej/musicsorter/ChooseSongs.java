@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -15,7 +16,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.HeaderViewListAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -37,10 +40,12 @@ public class ChooseSongs extends AppCompatActivity {
     EditText categoryTextfield;
 
     ArrayList<Integer> checkerImageIDs;
+    String categoryName;
 
     MySongAdapter songAdapter;
 
     Intent intent;
+
 
 
     @Override
@@ -65,12 +70,12 @@ public class ChooseSongs extends AppCompatActivity {
         categoryTextfield = (EditText)findViewById(R.id.textfield_categoryName);
 
         intent = getIntent();
-
         GetAndSetIntent();
 
         SetEmoticonButtonListener();
         SongListInit();
         SetSaveButtonListener();
+
 
         //songCategory = GetSongCategoryFromInputData();
 
@@ -87,7 +92,12 @@ public class ChooseSongs extends AppCompatActivity {
                 int imgID = intent.getExtras().getInt("ImageID");
                 smileButton.setImageResource(imgID);
             }catch (Exception e){
-
+            }
+            //intent coming when existing category is_choosen || from "choose_icon"
+            try{
+                categoryName = intent.getExtras().getString("songListName");
+                categoryTextfield.setText(categoryName);
+            }catch (Exception e){
             }
         }
     }
@@ -95,13 +105,12 @@ public class ChooseSongs extends AppCompatActivity {
     ArrayList<String> GetCheckedSongsNames(){
         ArrayList<String> checkedSongNames = new ArrayList<String>();
 
-        View itemView = songList.getAdapter().getView(2,null,null);
-        MySongAdapter myAdapter = (MySongAdapter)songList.getAdapter();
-        for(int i = 0; i < myAdapter.songNames.size(); ++i){
-            if(myAdapter.imagesID.get(i) == R.drawable.checker_checked) {
-                checkedSongNames.add(myAdapter.songNames.get(i));
+
+        for(int i = 0; i < songAdapter.songNames.size(); ++i){
+            //View adapView = myAdapter.getView(i,null,null);
+            if(songAdapter.imagesID.get(i) == R.drawable.checker_checked)
+                checkedSongNames.add(songAdapter.songNames.get(i));
             }
-        }
 
         return checkedSongNames;
     }
@@ -110,9 +119,9 @@ public class ChooseSongs extends AppCompatActivity {
         smileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 ArrayList<String> checkedNames = GetCheckedSongsNames();
-                startActivity(new Intent(getApplicationContext(), Choose_icon.class).putExtra("StartActivity_listOfSongs",checkedNames));
+                String textViewText = categoryTextfield.getText().toString();
+                startActivity(new Intent(getApplicationContext(), Choose_icon.class).putExtra("StartActivity_listOfSongs",checkedNames).putExtra("songListName",textViewText));
             }
         });
     }
@@ -122,38 +131,38 @@ public class ChooseSongs extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SongCategory songCategory = GetSongCategoryFromInputData();
-                MyXMLParser parser = new MyXMLParser();
-                ArrayList<SongCategory> allSongsCategories = parser.GetSongCategories(getApplicationContext());
 
-                //first remove all other songCategories with same name(there will be only one or none)
-                Iterator<SongCategory> it = allSongsCategories.iterator();
-                Toast.makeText(getApplicationContext(),"REMOVING",Toast.LENGTH_LONG).show();
-                while (it.hasNext()){
-                    SongCategory currentSong = it.next();
-                    if(currentSong.name.equalsIgnoreCase(songCategory.name)) {
-                        it.remove();
+                try {
+                    SongCategory songCategory = GetSongCategoryFromInputData();
+                    MyXMLParser parser = new MyXMLParser();
+                    ArrayList<SongCategory> allSongsCategories = parser.GetSongCategories(getApplicationContext());
+
+                    //first remove all other songCategories with same name(there will be only one or none)
+                    Iterator<SongCategory> it = allSongsCategories.iterator();
+                    while (it.hasNext()) {
+                        SongCategory currentSong = it.next();
+                        if (currentSong.name.equalsIgnoreCase(songCategory.name)) {
+                            it.remove();
+                        }
                     }
+
+                    //check for stupid values
+
+                    if (songCategory.name.equalsIgnoreCase(""))
+                        songCategory.name = "where's my name -.-";
+                    //songCategory.imageID = R.drawable.emoticon_smile;
+
+                    allSongsCategories.add(songCategory);
+                    parser.WriteToSongCategoriesXML(allSongsCategories);
+                    startActivity(new Intent(getApplicationContext(), OnAppOpenActivity.class));
+
+                }catch (Exception e){
+                    Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();
                 }
 
-                //check for stupid values
-                if(songCategory.name.equalsIgnoreCase(""))
-                    songCategory.name = "def";
-
-
-                //songCategory.imageID = R.drawable.emoticon_smile;
-                Toast.makeText(getApplicationContext(),"ss",Toast.LENGTH_LONG).show();
-
-                allSongsCategories.add(songCategory);
-                parser.WriteToSongCategoriesXML(allSongsCategories);
-                //1.) save category to XML
-                //2.) go to "OnAppOpenActivity"
-                startActivity(new Intent(getApplicationContext(),OnAppOpenActivity.class));
             }
         });
     }
-
-
 
     //Get SongCategory object that will be later written in XML file
     SongCategory GetSongCategoryFromInputData(){
@@ -164,7 +173,7 @@ public class ChooseSongs extends AppCompatActivity {
         try{
             songCategory.imageID = intent.getExtras().getInt("ImageID");
         }catch (Exception e){
-            songCategory.imageID = R.drawable.emoticon_smile;
+            songCategory.imageID = R.drawable.emoticon_happy;
         }
 
         for(int i = 0; i < songList.getCount(); ++i){
@@ -177,16 +186,43 @@ public class ChooseSongs extends AppCompatActivity {
             }
 
         }
-
         return songCategory;
+    }
+
+    void RemoveListFromXML(){
+        MyXMLParser parser = new MyXMLParser();
+        ArrayList<SongCategory> categories = parser.GetSongCategories(this);
+        //remove it
+        Iterator<SongCategory> it = categories.iterator();
+        while(it.hasNext()){
+            SongCategory currentSong = it.next();
+            if(currentSong.name.equalsIgnoreCase(categoryName)) {
+                it.remove();
+            }
+        }
+        //save change
+        parser.WriteToSongCategoriesXML(categories);
     }
 
     //seting up list of songs
     public void SongListInit(){
         //get list of all .mp3 and display it in list
-        File rootFile = new File("/storage/sdcard0");
+        File rootFile = new File(Environment.getExternalStorageDirectory().getPath().toString()+"/Music");
+        //File rootFile = Environment.getExternalStorageDirectory();
         ArrayList<File> SongFiles = GetAllMusicFiles(rootFile);
+
+        //set list footer
+        //ste on click listener for footer button
+        Button removeButton = (Button)findViewById(R.id.button_removeList);
+        removeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RemoveListFromXML();
+                startActivity(new Intent(getApplicationContext(),OnAppOpenActivity.class));
+            }
+        });
         // take their names and adapt them to list
+        //songList.addFooterView(footerView);
         songAdapter = new MySongAdapter(this,GetNamesFromSongList(SongFiles));
         songList.setAdapter(songAdapter);
     }

@@ -24,7 +24,8 @@
 
     <ImageButton
         android:id="@+id/emoticonImage_id"
-        android:src="@drawable/emoticon_skull"
+        android:src="@drawable/emoticon_weird"
+        android:background="#0000"
         android:clickable="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

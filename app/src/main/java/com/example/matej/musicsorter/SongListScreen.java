@@ -8,6 +8,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -40,15 +41,22 @@ public class SongListScreen extends AppCompatActivity {
         });
 
 
-
         //list of songs(Strings) that we got from "OnAppOpenActivity" by clicking on song category
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         songNamesList = (ArrayList)bundle.getParcelableArrayList("songNamesList");
 
        // File root = Environment.getExternalStorageDirectory();
-        File root = new File("/storage/sdcard0");
+        File root = new File(Environment.getExternalStorageDirectory().getPath().toString()+"/Music");
         ArrayList<File> allMusicFiles = GetAllMusicFiles(root);
+        //if SD card is found, read songs from SD as well
+        /*boolean isSDFound = android.os.Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+        if(isSDFound) {
+            Toast.makeText(getApplicationContext(),"00000",Toast.LENGTH_SHORT).show();
+            File rootSD = Environment.getExternalStorageDirectory();
+            allMusicFiles.addAll(GetAllMusicFiles(rootSD));
+        }
+        */
         final ArrayList<File> songObjectList = GetRightsSongsFromAllSongs(allMusicFiles);
 
         final ListView songList = (ListView)findViewById(R.id.list_songsNameList);
@@ -57,16 +65,11 @@ public class SongListScreen extends AppCompatActivity {
         songList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                TextView text = (TextView)findViewById(R.id.textView);
-                text.setText(GetNamesFromSongList(songObjectList).get(position));
                 startActivity(new Intent(getApplicationContext(),Player.class).putExtra("position",position).putExtra("songObjectList",songObjectList));
                 //go to new screen and play song
             }
         });
-
-
     }
-
 
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -109,7 +112,7 @@ public class SongListScreen extends AppCompatActivity {
 
         for(File songfile : allMusicFiles){
             for(String songName : songNamesList)
-                if(songfile.getName().matches(songName) && IsFileUniqueInList(songName,finalMusicFileList)){
+                if(songfile.getName().equalsIgnoreCase(songName) && IsFileUniqueInList(songName,finalMusicFileList)){
                     finalMusicFileList.add(songfile);
                 }
         }
