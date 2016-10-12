@@ -51,19 +51,9 @@ public class OnAppOpenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_on_app_open);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
 
-        Toast.makeText(getApplicationContext(),Integer.toString(android.os.Build.VERSION.SDK_INT),Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(),Integer.toString(android.os.Build.VERSION.SDK_INT),Toast.LENGTH_LONG).show();
 
         //access for graphic objects
         list = (ListView)findViewById(R.id.listView);

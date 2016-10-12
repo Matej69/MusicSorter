@@ -16,7 +16,7 @@
         android:layout_alignParentEnd="true"
         android:autoText="false"
         android:textAlignment="center"
-        android:textSize="@dimen/abc_dialog_padding_material"
+        android:textSize="13dp"
         android:layout_alignBottom="@+id/emoticonImage_id"
         android:gravity="center_vertical"
         android:textStyle="bold"

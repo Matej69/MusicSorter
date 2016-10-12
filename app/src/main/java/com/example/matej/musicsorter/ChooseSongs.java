@@ -8,10 +8,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -26,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -52,16 +55,6 @@ public class ChooseSongs extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_songs);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         //graphic object setup
         smileButton = (ImageButton)findViewById(R.id.smileButton);
@@ -73,9 +66,10 @@ public class ChooseSongs extends AppCompatActivity {
         GetAndSetIntent();
 
         SetEmoticonButtonListener();
-        SongListInit();
-        SetSaveButtonListener();
 
+            SongListInit();
+
+        SetSaveButtonListener();
 
         //songCategory = GetSongCategoryFromInputData();
 
@@ -104,7 +98,6 @@ public class ChooseSongs extends AppCompatActivity {
 
     ArrayList<String> GetCheckedSongsNames(){
         ArrayList<String> checkedSongNames = new ArrayList<String>();
-
 
         for(int i = 0; i < songAdapter.songNames.size(); ++i){
             //View adapView = myAdapter.getView(i,null,null);
@@ -157,7 +150,6 @@ public class ChooseSongs extends AppCompatActivity {
                     startActivity(new Intent(getApplicationContext(), OnAppOpenActivity.class));
 
                 }catch (Exception e){
-                    Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -207,12 +199,18 @@ public class ChooseSongs extends AppCompatActivity {
     //seting up list of songs
     public void SongListInit(){
         //get list of all .mp3 and display it in list
-        File rootFile = new File(Environment.getExternalStorageDirectory().getPath().toString()+"/Music");
-        //File rootFile = Environment.getExternalStorageDirectory();
-        ArrayList<File> SongFiles = GetAllMusicFiles(rootFile);
+        File rootFileSD0 = new File(Environment.getExternalStorageDirectory().getPath().toString());   // TABLET -> storage/sdcard0/  :: MOB -> storage/emulated/0
+        File rootFileSD1 = new File("storage/sdcard1/");
+
+        ArrayList<File> SongFiles = GetAllMusicFiles(rootFileSD0);
+        try{
+            SongFiles.addAll(GetAllMusicFiles(rootFileSD1));
+        }catch (Exception e){
+            //Toast.makeText(this, "SD1 CARD IS NOT FOUND",Toast.LENGTH_LONG).show();
+        }
 
         //set list footer
-        //ste on click listener for footer button
+        //set on click listener for footer button
         Button removeButton = (Button)findViewById(R.id.button_removeList);
         removeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -222,9 +220,9 @@ public class ChooseSongs extends AppCompatActivity {
             }
         });
         // take their names and adapt them to list
-        //songList.addFooterView(footerView);
-        songAdapter = new MySongAdapter(this,GetNamesFromSongList(SongFiles));
-        songList.setAdapter(songAdapter);
+            songAdapter = new MySongAdapter(this,GetNamesFromSongList(SongFiles));
+            songList.setAdapter(songAdapter);
+
     }
 
 
@@ -235,11 +233,16 @@ public class ChooseSongs extends AppCompatActivity {
         ArrayList<File> songfiles = new ArrayList<File>();
 
         //search through all files and find all .mp3 songs
+
+        //try/catch is here because some folder, even with android premision, can not be read --> .android_secure
         for(File file : allFiles){
             if(file.isDirectory()){
-                songfiles.addAll(GetAllMusicFiles(file));
+                try {
+                    songfiles.addAll(GetAllMusicFiles(file));
+                }catch (Exception e){
+                }
             }
-            else if (file.getName().endsWith(".mp3")){
+            else if (file.getName().endsWith(".mp3") || file.getName().endsWith(".mp4") || file.getName().endsWith(".wav") || file.getName().endsWith(".aac")){
                 songfiles.add(file);
             }
         }

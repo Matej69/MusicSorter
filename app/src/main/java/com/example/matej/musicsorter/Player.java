@@ -43,8 +43,6 @@ public class Player extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         //references to graphic objects
         songName = (TextView)findViewById(R.id.text_songName);

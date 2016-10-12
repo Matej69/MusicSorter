@@ -29,16 +29,6 @@ public class SongListScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_song_list_screen);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
 
         //list of songs(Strings) that we got from "OnAppOpenActivity" by clicking on song category
@@ -47,8 +37,17 @@ public class SongListScreen extends AppCompatActivity {
         songNamesList = (ArrayList)bundle.getParcelableArrayList("songNamesList");
 
        // File root = Environment.getExternalStorageDirectory();
-        File root = new File(Environment.getExternalStorageDirectory().getPath().toString()+"/Music");
-        ArrayList<File> allMusicFiles = GetAllMusicFiles(root);
+                //File root = new File(Environment.getExternalStorageDirectory().getPath().toString()+"/Music");
+                //ArrayList<File> allMusicFiles = GetAllMusicFiles(root);
+        File rootFileSD0 = new File(Environment.getExternalStorageDirectory().getPath().toString());   // TABLET -> storage/sdcard0/  :: MOB -> storage/emulated/0
+        File rootFileSD1 = new File("storage/sdcard1/");
+
+        ArrayList<File> SongFiles = GetAllMusicFiles(rootFileSD0);
+        try{
+            SongFiles.addAll(GetAllMusicFiles(rootFileSD1));
+        }catch (Exception e){
+            //Toast.makeText(this, "SD1 CARD IS NOT FOUND",Toast.LENGTH_LONG).show();
+        }
         //if SD card is found, read songs from SD as well
         /*boolean isSDFound = android.os.Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
         if(isSDFound) {
@@ -57,7 +56,7 @@ public class SongListScreen extends AppCompatActivity {
             allMusicFiles.addAll(GetAllMusicFiles(rootSD));
         }
         */
-        final ArrayList<File> songObjectList = GetRightsSongsFromAllSongs(allMusicFiles);
+        final ArrayList<File> songObjectList = GetRightsSongsFromAllSongs(SongFiles);
 
         final ListView songList = (ListView)findViewById(R.id.list_songsNameList);
         ArrayAdapter<String> adapter = new ArrayAdapter(this,R.layout.songlistitem,R.id.text_songNameItem_id,GetNamesFromSongList(songObjectList));
@@ -96,9 +95,12 @@ public class SongListScreen extends AppCompatActivity {
        //search through all files and find all .mp3 songs
        for(File file : allFiles){
            if(file.isDirectory()){
-               songfiles.addAll(GetAllMusicFiles(file));
+               try {
+                   songfiles.addAll(GetAllMusicFiles(file));
+               }catch (Exception e){
+               }
            }
-           else if (file.getName().endsWith(".mp3")){
+           else if (file.getName().endsWith(".mp3") || file.getName().endsWith(".mp4") || file.getName().endsWith(".wav") || file.getName().endsWith(".aac")){
               if(IsFileUniqueInList(file.getName(), songfiles))
                    songfiles.add(file);
            }
